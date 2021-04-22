@@ -1,0 +1,26 @@
+{
+    "telegram": {
+        "key": "",
+        "room_id": ""
+    },
+    "app": {
+        "seen_file": "seen.txt",
+        "parsers": [
+            {
+                "website": "https://www.zonaprop.com.ar",
+                "link_regex": "a.go-to-posting"
+            },
+            {
+                "website": "https://www.argenprop.com",
+                "link_regex": "div.listing__items div.listing__item a"
+            },
+            {
+                "website": "https://inmuebles.mercadolibre.com.ar",
+                "link_regex": "li.results-item .rowItem.item a"
+            }
+        ],
+        "urls": [
+            "https://www.argenprop.com/departamento-alquiler-barrio-palermo-barrio-belgrano-barrio-colegiales-barrio-villa-crespo-2-ambientes-y-3-ambientes-25000-75000-pesos-1-o-m%c3%a1s-cocheras-desde-45-m2-cubiertos-con-ambiente-balcon-orden-masnuevos"
+        ]
+    }
+}
