@@ -100,6 +100,8 @@ def _bootstrap(config_file) -> Configuration:
 
 
 def _main():
+    log.info("Fetching from %d sources", len(configuration.urls))
+
     for url in configuration.urls:
         res = requests.get(url)
         ads = list(extract_ads(url, res.text))
