@@ -16,5 +16,5 @@ python3 /home/ec2-user/app/main.py --config /home/ec2-user/app/Config.json --log
 
 ### TODO
 - [X] Add a CLI to input the configuration file path and log file
-- [ ] Add a configuration to select a dummy notifier
+- [X] Add a configuration to select a dummy notifier
 - [ ] Support pagination
