@@ -7,6 +7,7 @@ from typing import List, TextIO
 import json
 import logging
 import argparse
+import cloudscraper
 
 parser = argparse.ArgumentParser(description="Deptos scraper CLI")
 parser.add_argument("--config", dest="config_file", required=True,
@@ -20,7 +21,7 @@ args = parser.parse_args()
 
 def _bootstrap_logger(log_file):
     log = logging.getLogger("app")
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
 
     fh = logging.FileHandler(log_file)
     fh.setLevel(logging.DEBUG)
@@ -40,6 +41,7 @@ def _bootstrap_logger(log_file):
 
 
 log = _bootstrap_logger(args.logging_file)
+scraper = cloudscraper.create_scraper()
 
 
 @dataclass
@@ -56,13 +58,28 @@ class Parser:
             yield {"id": _id, "url": "{}{}".format(self.website, href)}
 
 
+class Fetcher:
+    # TODO: Add pagination inside the fetcher
+    def __init__(self, website: str, has_agent_protection: bool = False):
+        self.website = website
+        self._get_website = scraper.get if has_agent_protection else requests.get
+
+    def get(self, url: str):
+        return self._get_website(url)
+
+
+default_fetcher = Fetcher('default')
+
+
 @dataclass
 class Configuration:
     seen_file: str
     parsers: List[Parser]
+    fetchers: List[Fetcher]
     urls: List[str]
     telegram_key: str
     telegram_room_id: str
+    telegram_notifier_enabled: bool
 
 
 configuration: Configuration = None
@@ -70,22 +87,27 @@ configuration: Configuration = None
 
 def from_config_file(file_ptr: TextIO):
     log.info("Reading raw configuration file")
-    c = json.load(file_ptr)
 
+    c = json.load(file_ptr)
     app_c = c["app"]
+    tlg_c = c["telegram"]
 
     parsers = [Parser(parser_c["website"], parser_c["link_regex"])
                for parser_c in app_c["parsers"]]
     log.info("Registered %d parsers", len(parsers))
 
-    tlg_c = c["telegram"]
+    fetchers = [Fetcher(fetcher_c["website"], fetcher_c["has_agent_protection"])
+                for fetcher_c in app_c["fetchers"]]
+    log.info("Registered %d fetchers", len(parsers))
 
     return Configuration(
         app_c["seen_file"],
         parsers,
+        fetchers,
         app_c["urls"],
         tlg_c["key"],
-        tlg_c["room_id"]
+        tlg_c["room_id"],
+        tlg_c["enabled"]
     )
 
 
@@ -103,7 +125,12 @@ def _main():
     log.info("Fetching from %d sources", len(configuration.urls))
 
     for url in configuration.urls:
-        res = requests.get(url)
+        # Find applicable fetcher
+        uri = urlparse(url)
+        fetcher = next(
+            (f for f in configuration.fetchers if uri.hostname in f.website), default_fetcher)
+
+        res = fetcher.get(url)
         ads = list(extract_ads(url, res.text))
         seen, unseen = split_seen_and_unseen(ads)
 
@@ -111,7 +138,8 @@ def _main():
 
         for u in unseen:
             log.debug("new depto: %s", u)
-            notify(u)
+            if configuration.telegram_notifier_enabled:
+                notify(u)
 
         mark_as_seen(unseen)
 

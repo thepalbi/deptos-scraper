@@ -1,5 +1,6 @@
 {
     "telegram": {
+        "enabled": false,
         "key": "",
         "room_id": ""
     },
@@ -17,6 +18,12 @@
             {
                 "website": "https://inmuebles.mercadolibre.com.ar",
                 "link_regex": "li.results-item .rowItem.item a"
+            }
+        ],
+        "fetchers": [
+            {
+                "website": "https://www.zonaprop.com.ar",
+                "has_agent_protection": true
             }
         ],
         "urls": [
