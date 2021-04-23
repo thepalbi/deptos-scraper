@@ -22,7 +22,7 @@ def _bootstrap_logger(log_file):
     log = logging.getLogger("app")
     log.setLevel(logging.INFO)
 
-    fh = logging.FileHandler("app.log")
+    fh = logging.FileHandler(log_file)
     fh.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler()
