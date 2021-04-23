@@ -7,7 +7,21 @@ from typing import List, TextIO
 import json
 import logging
 
-logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("app")
+log.setLevel(logging.INFO)
+
+fh = logging.FileHandler("app.log")
+fh.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+
+log.addHandler(fh)
+log.addHandler(ch)
 
 
 @dataclass
@@ -37,14 +51,14 @@ configuration: Configuration = None
 
 
 def from_config_file(file_ptr: TextIO):
-    logging.info("Reading raw configuration file")
+    log.info("Reading raw configuration file")
     c = json.load(file_ptr)
 
     app_c = c["app"]
 
     parsers = [Parser(parser_c["website"], parser_c["link_regex"])
                for parser_c in app_c["parsers"]]
-    logging.info("Registered %d parsers", len(parsers))
+    log.info("Registered %d parsers", len(parsers))
 
     tlg_c = c["telegram"]
 
@@ -58,12 +72,12 @@ def from_config_file(file_ptr: TextIO):
 
 
 def _bootstrap() -> Configuration:
-    logging.info("Opening configuration file")
+    log.info("Opening configuration file")
     try:
         with open("Config.json", "r") as f:
             return from_config_file(f)
     except Exception as e:
-        logging.fatal("Failed to bootstrap scraper. Cause: %s", e)
+        log.fatal("Failed to bootstrap scraper. Cause: %s", e)
         raise Exception("failed to bootstrap scraper")
 
 
@@ -73,10 +87,10 @@ def _main():
         ads = list(extract_ads(url, res.text))
         seen, unseen = split_seen_and_unseen(ads)
 
-        logging.info("%d seen, %d unseen", len(seen), len(unseen))
+        log.info("%d seen, %d unseen", len(seen), len(unseen))
 
         for u in unseen:
-            logging.info("new depto: %s", u)
+            log.debug("new depto: %s", u)
             notify(u)
 
         mark_as_seen(unseen)
@@ -117,9 +131,9 @@ def mark_as_seen(unseen):
 
 
 if __name__ == "__main__":
-    logging.info("Starting scraper")
+    log.info("Starting scraper")
 
     configuration = _bootstrap()
-    logging.info("Scraper bootstraped successfully. Running!")
+    log.info("Scraper bootstraped successfully. Running!")
 
     _main()
