@@ -105,10 +105,8 @@ def get_history():
 
 
 def notify(ad):
-    bot = "YOUR_BOT_ID"
-    room = "YOUR_CHAT_ROOM_ID"
     url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}".format(
-        bot, room, ad["url"])
+        configuration.telegram_key, configuration.telegram_room_id, ad["url"])
     r = requests.get(url)
 
 
