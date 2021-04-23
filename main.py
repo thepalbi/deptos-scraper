@@ -76,8 +76,8 @@ def _main():
         logging.info("%d seen, %d unseen", len(seen), len(unseen))
 
         for u in unseen:
-            # notify(u)
-            print(u)
+            logging.info("new depto: %s", u)
+            notify(u)
 
         mark_as_seen(unseen)
 
