@@ -4,5 +4,5 @@ Credit for the original idea goes to the following article: https://dev.to/ferna
 
 
 ### TODO
-- [ ] Add a CLI to input the configuration file path
+- [X] Add a CLI to input the configuration file path and log file
 - [ ] Add a configuration to select a dummy notifier

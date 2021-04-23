@@ -6,22 +6,40 @@ from dataclasses import dataclass
 from typing import List, TextIO
 import json
 import logging
+import argparse
 
-log = logging.getLogger("app")
-log.setLevel(logging.INFO)
+parser = argparse.ArgumentParser(description="Deptos scraper CLI")
+parser.add_argument("--config", dest="config_file", required=True,
+                    type=str, help="Path to the configuration file")
+parser.add_argument("--log", dest="logging_file",
+                    required=True, type=str, help="Path to the log file")
 
-fh = logging.FileHandler("app.log")
-fh.setLevel(logging.DEBUG)
 
-ch = logging.StreamHandler()
-ch.setLevel(logging.ERROR)
+args = parser.parse_args()
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
 
-log.addHandler(fh)
-log.addHandler(ch)
+def _bootstrap_logger(log_file):
+    log = logging.getLogger("app")
+    log.setLevel(logging.INFO)
+
+    fh = logging.FileHandler("app.log")
+    fh.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+
+    log.addHandler(fh)
+    log.addHandler(ch)
+
+    return log
+
+
+log = _bootstrap_logger(args.logging_file)
 
 
 @dataclass
@@ -71,10 +89,10 @@ def from_config_file(file_ptr: TextIO):
     )
 
 
-def _bootstrap() -> Configuration:
-    log.info("Opening configuration file")
+def _bootstrap(config_file) -> Configuration:
+    log.info("Opening configuration file: %s", config_file)
     try:
-        with open("Config.json", "r") as f:
+        with open(config_file, "r") as f:
             return from_config_file(f)
     except Exception as e:
         log.fatal("Failed to bootstrap scraper. Cause: %s", e)
@@ -133,7 +151,7 @@ def mark_as_seen(unseen):
 if __name__ == "__main__":
     log.info("Starting scraper")
 
-    configuration = _bootstrap()
+    configuration = _bootstrap(args.config_file)
     log.info("Scraper bootstraped successfully. Running!")
 
     _main()
