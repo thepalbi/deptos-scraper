@@ -15,6 +15,12 @@ python3 /home/ec2-user/app/main.py --config /home/ec2-user/app/Config.json --log
 ```
 
 ### TODO
+**Done**
 - [X] Add a CLI to input the configuration file path and log file
 - [X] Add a configuration to select a dummy notifier
+
+**P0**
 - [ ] Support pagination
+
+**P1**
+- [ ] Check in configuration file that seen file path is absolute, and all paths as well. This will prevent unknown locations when running with cron.
