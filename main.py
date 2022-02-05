@@ -47,6 +47,7 @@ scraper = cloudscraper.create_scraper()
 @dataclass
 class Parser:
     website: str
+    # TODO: Rename this to link_css_path or sth like that!
     link_regex: str
 
     def extract_links(self, contents: str):
