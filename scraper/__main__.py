@@ -7,7 +7,12 @@ from typing import List, TextIO
 import json
 import logging
 import argparse
-import cloudscraper
+import cfscrape
+import os
+import sys
+from scraper.fetchers import playwright
+
+from scraper.fetchers.playwright import PlaywrightFetcher
 
 parser = argparse.ArgumentParser(description="Deptos scraper CLI")
 parser.add_argument("--config", dest="config_file", required=True,
@@ -19,15 +24,15 @@ parser.add_argument("--log", dest="logging_file",
 args = parser.parse_args()
 
 
-def _bootstrap_logger(log_file):
+def _bootstrap_logger(log_file, is_local_environment=False):
     log = logging.getLogger("app")
     log.setLevel(logging.DEBUG)
 
     fh = logging.FileHandler(log_file)
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(logging.INFO)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.ERROR)
+    ch = logging.StreamHandler(stream=sys.stdout)
+    ch.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -40,8 +45,11 @@ def _bootstrap_logger(log_file):
     return log
 
 
-log = _bootstrap_logger(args.logging_file)
-scraper = cloudscraper.create_scraper()
+env_var_name = "DEPTOS_SCRAPER_ENV"
+is_local_environment = env_var_name in os.environ and os.environ[env_var_name] == "local"
+log = _bootstrap_logger(args.logging_file, is_local_environment)
+scraper = cfscrape.create_scraper()
+playwright_fetcher = PlaywrightFetcher()
 
 
 @dataclass
@@ -63,7 +71,7 @@ class Fetcher:
     # TODO: Add pagination inside the fetcher
     def __init__(self, website: str, has_agent_protection: bool = False):
         self.website = website
-        self._get_website = scraper.get if has_agent_protection else requests.get
+        self._get_website = playwright_fetcher.get if has_agent_protection else requests.get
 
     def get(self, url: str):
         return self._get_website(url)
@@ -132,6 +140,11 @@ def _main():
             (f for f in configuration.fetchers if uri.hostname in f.website), default_fetcher)
 
         res = fetcher.get(url)
+        if res.status_code != 200:
+            log.error("error getting url. status_code=%d", res.status_code)
+            # log.debug("raw response: %s", res.text)
+            continue
+
         ads = list(extract_ads(url, res.text))
         seen, unseen = split_seen_and_unseen(ads)
 
