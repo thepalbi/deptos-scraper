@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.urls import include, path
 from rest_framework import routers, serializers, viewsets
+from core.views import PropertyViewSet
 
 
 # Serializers define the API representation.
@@ -35,6 +36,7 @@ class UserViewSet(viewsets.ModelViewSet):
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
+router.register(r'properties', PropertyViewSet)
 
 
 urlpatterns = [
