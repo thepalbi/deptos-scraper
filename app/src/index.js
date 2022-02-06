@@ -2,6 +2,6 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import m from 'mithril';
-import { MainView } from './MainView';
+import RealEstateList from './views/RealEstateList';
 
-m.mount(document.body, MainView);
+m.mount(document.body, RealEstateList);

@@ -15,7 +15,7 @@ Object.keys(process.env).filter(key => key.startsWith('MITHRIL_')).forEach(key =
 });
 plugins.push(new webpack.DefinePlugin(envs));
 
-let app = ['./client/index.js'];
+let app = ['./src/index.js'];
 let rules = [];
 if (babel) {
   // app.unshift('@babel/polyfill');
