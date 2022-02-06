@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .serializers import PropertySerializer
-from .models import Property
+from .serializers import RealEstateSerializer
+from .models import RealEstate
 from rest_framework import viewsets
 
-class PropertyViewSet(viewsets.ModelViewSet):
-    queryset = Property.objects.all()
-    serializer_class = PropertySerializer
+class RealEstateViewSet(viewsets.ModelViewSet):
+    queryset = RealEstate.objects.all()
+    serializer_class = RealEstateSerializer

@@ -1,8 +1,8 @@
-from .models import Property
+from .models import RealEstate
 from rest_framework import serializers
 
 
-class PropertySerializer(serializers.HyperlinkedModelSerializer):
+class RealEstateSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Property
+        model = RealEstate
         fields = ["url"]
